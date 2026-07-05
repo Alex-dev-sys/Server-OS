@@ -11,11 +11,8 @@ import { MinecraftPage } from '@/pages/MinecraftPage'
 import { OpenClawPage } from '@/pages/OpenClawPage'
 import { ServicePage } from '@/pages/ServicePage'
 import { DeploymentsPage } from '@/pages/DeploymentsPage'
-import { PlaceholderPage } from '@/pages/PlaceholderPage'
-
-const soon = (title: string, phase: string, note: string) => (
-  <PlaceholderPage title={title} phase={phase} note={note} />
-)
+import { UsersPage } from '@/pages/UsersPage'
+import { SettingsPage } from '@/pages/SettingsPage'
 
 export const router = createBrowserRouter([
   {
@@ -38,8 +35,8 @@ export const router = createBrowserRouter([
       { path: 'incidents', element: <IncidentsPage /> },
       { path: 'alerts', element: <AlertsPage /> },
       { path: 'emergency', element: <EmergencyPage /> },
-      { path: 'users', element: soon('Users', 'Phase 4', 'Access control and audit of who did what.') },
-      { path: 'settings', element: soon('Settings', 'Phase 4', 'Theme, integrations and automation rules.') },
+      { path: 'users', element: <UsersPage /> },
+      { path: 'settings', element: <SettingsPage /> },
     ],
   },
 ])

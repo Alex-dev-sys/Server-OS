@@ -5,9 +5,14 @@ import { Topbar } from './Topbar'
 import { CommandPalette } from '@/components/command/CommandPalette'
 import { ServiceDrawer } from '@/components/infrastructure/ServiceDrawer'
 import { useUI } from '@/stores/ui'
+import { applyAccent, useSettings } from '@/stores/settings'
 
 export function AppShell() {
   const setCommandOpen = useUI((s) => s.setCommandOpen)
+  const accent = useSettings((s) => s.accent)
+
+  // Keep the live theme accent in sync with the persisted setting.
+  useEffect(() => applyAccent(accent), [accent])
 
   // Global ⌘K / Ctrl+K
   useEffect(() => {

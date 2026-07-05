@@ -1,5 +1,6 @@
 import type {
   AppNotification,
+  AuditEntry,
   Deployment,
   HostVitals,
   Incident,
@@ -9,6 +10,7 @@ import type {
   Service,
   ServiceAction,
   ServiceStatus,
+  User,
 } from '@/types'
 import { clamp, seeded } from '@/lib/utils'
 
@@ -77,6 +79,53 @@ const DEPLOY_SEEDS: DeploySeed[] = [
   { serviceId: 'monitoring', version: 'Prom 3.0', previousVersion: 'Prom 2.54', status: 'success', env: 'production', branch: 'main', message: 'Prometheus 3.0 major upgrade', commit: 'pr30aa2', agoSec: 140 * H, durationSec: 96 },
   { serviceId: 'api', version: '2.7.3', previousVersion: '2.7.2', status: 'success', env: 'production', branch: 'main', message: 'Cache layer for /v1/status', commit: 'api273z', agoSec: 150 * H, durationSec: 74 },
   { serviceId: 'openclaw', version: '0.9.2', previousVersion: '0.9.1', status: 'success', env: 'production', branch: 'main', message: 'Fix job dedupe race', commit: 'oc92xy1', agoSec: 168 * H, durationSec: 47 },
+]
+
+// ── Team & access seed ───────────────────────────────────
+interface UserSeed {
+  id: string
+  name: string
+  email: string
+  role: User['role']
+  status: User['status']
+  mfa: boolean
+  lastActiveSec: number // ago
+  createdDaysAgo: number
+  actionsCount: number
+}
+
+const USER_SEEDS: UserSeed[] = [
+  { id: 'u-danil', name: 'Danil', email: 'danilitmo@gmail.com', role: 'owner', status: 'active', mfa: true, lastActiveSec: 90, createdDaysAgo: 412, actionsCount: 1284 },
+  { id: 'u-mara', name: 'Mara Voss', email: 'mara@natux.world', role: 'admin', status: 'active', mfa: true, lastActiveSec: 22 * 60, createdDaysAgo: 210, actionsCount: 613 },
+  { id: 'u-kai', name: 'Kai Renn', email: 'kai@natux.world', role: 'operator', status: 'active', mfa: false, lastActiveSec: 3 * 3600, createdDaysAgo: 96, actionsCount: 208 },
+  { id: 'u-bot', name: 'Deploy Bot', email: 'ci@natux.world', role: 'operator', status: 'active', mfa: true, lastActiveSec: 300, createdDaysAgo: 180, actionsCount: 947 },
+  { id: 'u-lena', name: 'Lena Ost', email: 'lena@natux.world', role: 'viewer', status: 'active', mfa: false, lastActiveSec: 26 * 3600, createdDaysAgo: 41, actionsCount: 37 },
+  { id: 'u-new', name: 'Tom Adeyemi', email: 'tom@natux.world', role: 'operator', status: 'invited', mfa: false, lastActiveSec: 0, createdDaysAgo: 2, actionsCount: 0 },
+  { id: 'u-old', name: 'Rex Halloran', email: 'rex@old.natux.world', role: 'admin', status: 'suspended', mfa: true, lastActiveSec: 61 * 86400, createdDaysAgo: 320, actionsCount: 502 },
+]
+
+interface AuditSeed {
+  userId: string
+  action: string
+  target: string
+  result: AuditEntry['result']
+  ip: string
+  agoSec: number
+}
+
+const AUDIT_SEEDS: AuditSeed[] = [
+  { userId: 'u-bot', action: 'deploy.start', target: 'website@4.2.0-rc.1', result: 'ok', ip: '10.0.0.6', agoSec: 300 },
+  { userId: 'u-danil', action: 'auth.login', target: 'console', result: 'ok', ip: '188.32.14.9', agoSec: 90 },
+  { userId: 'u-mara', action: 'service.restart', target: 'redis', result: 'ok', ip: '10.0.0.4', agoSec: 22 * 60 },
+  { userId: 'u-kai', action: 'service.stop', target: 'openclaw', result: 'denied', ip: '10.0.0.9', agoSec: 3 * 3600 },
+  { userId: 'u-bot', action: 'deploy.rollback', target: 'api@2.7.4', result: 'ok', ip: '10.0.0.6', agoSec: 52 * 3600 },
+  { userId: 'u-danil', action: 'user.role_change', target: 'kai → operator', result: 'ok', ip: '188.32.14.9', agoSec: 96 * 3600 },
+  { userId: 'u-old', action: 'auth.login', target: 'console', result: 'failed', ip: '45.9.148.2', agoSec: 61 * 86400 },
+  { userId: 'u-danil', action: 'user.suspend', target: 'rex', result: 'ok', ip: '188.32.14.9', agoSec: 60 * 86400 },
+  { userId: 'u-mara', action: 'settings.update', target: 'integrations.pagerduty', result: 'ok', ip: '10.0.0.2', agoSec: 5 * 3600 },
+  { userId: 'u-lena', action: 'incident.view', target: 'inc-postgres-01', result: 'ok', ip: '10.0.0.7', agoSec: 26 * 3600 },
+  { userId: 'u-danil', action: 'user.invite', target: 'tom@natux.world', result: 'ok', ip: '188.32.14.9', agoSec: 2 * 86400 },
+  { userId: 'u-kai', action: 'service.restart', target: 'minecraft', result: 'ok', ip: '10.0.0.8', agoSec: 30 * 3600 },
 ]
 
 function isoAgo(nowMs: number, sec: number): string {
@@ -182,6 +231,8 @@ export class MockInfraEngine {
   private incidents: Incident[] = []
   private deployments: Deployment[] = []
   private notifications: AppNotification[] = []
+  private users: User[] = []
+  private auditLog: AuditEntry[] = []
   private listeners = new Set<Listener>()
   private tick = 0
   private timer: ReturnType<typeof setInterval> | null = null
@@ -213,6 +264,7 @@ export class MockInfraEngine {
     this.recomputeHealth()
     this.seedNotifications(now)
     this.seedDeployments(now)
+    this.seedTeam(now)
   }
 
   // ── Subscriptions ──────────────────────────────────────
@@ -249,6 +301,10 @@ export class MockInfraEngine {
         (a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime(),
       ),
       notifications: [...this.notifications].sort(
+        (a, b) => new Date(b.ts).getTime() - new Date(a.ts).getTime(),
+      ),
+      users: this.users,
+      auditLog: [...this.auditLog].sort(
         (a, b) => new Date(b.ts).getTime() - new Date(a.ts).getTime(),
       ),
       host: this.hostVitals(services),
@@ -603,6 +659,29 @@ export class MockInfraEngine {
       message: d.message,
       startedAt: isoAgo(now, d.agoSec),
       durationSec: d.durationSec,
+    }))
+  }
+
+  private seedTeam(now: number) {
+    this.users = USER_SEEDS.map((u) => ({
+      id: u.id,
+      name: u.name,
+      email: u.email,
+      role: u.role,
+      status: u.status,
+      mfa: u.mfa,
+      actionsCount: u.actionsCount,
+      lastActive: isoAgo(now, u.status === 'invited' ? 0 : u.lastActiveSec),
+      createdAt: isoAgo(now, u.createdDaysAgo * 86400),
+    }))
+    this.auditLog = AUDIT_SEEDS.map((a, i) => ({
+      id: `aud-${i + 1}`,
+      userId: a.userId,
+      action: a.action,
+      target: a.target,
+      result: a.result,
+      ip: a.ip,
+      ts: isoAgo(now, a.agoSec),
     }))
   }
 }

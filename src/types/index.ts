@@ -117,6 +117,36 @@ export interface AppNotification {
   serviceId?: string
 }
 
+// ── Access control & audit ───────────────────────────────
+
+export type Role = 'owner' | 'admin' | 'operator' | 'viewer'
+
+export type UserStatus = 'active' | 'invited' | 'suspended'
+
+export interface User {
+  id: string
+  name: string
+  email: string
+  role: Role
+  status: UserStatus
+  lastActive: string // ISO
+  createdAt: string // ISO
+  mfa: boolean
+  actionsCount: number // lifetime audit entries
+}
+
+export type AuditResult = 'ok' | 'denied' | 'failed'
+
+export interface AuditEntry {
+  id: string
+  userId: string
+  action: string // verb-ish, e.g. "service.restart"
+  target: string // what it touched, e.g. "minecraft"
+  result: AuditResult
+  ip: string
+  ts: string // ISO
+}
+
 // ── Derived / aggregate views ────────────────────────────
 
 export interface HostVitals {
@@ -143,6 +173,8 @@ export interface InfraSnapshot {
   incidents: Incident[]
   deployments: Deployment[]
   notifications: AppNotification[]
+  users: User[]
+  auditLog: AuditEntry[]
   host: HostVitals
   summary: InfraSummary
   serverTimeMs: number
