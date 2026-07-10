@@ -37,10 +37,6 @@ export function DeploymentsPage() {
   const deployments = data?.deployments ?? []
   const active = deployments.find((d) => d.id === selected) ?? deployments[0] ?? null
 
-  useEffect(() => {
-    if (!selected && deployments[0]) setSelected(deployments[0].id)
-  }, [deployments, selected])
-
   if (isLoading || !data) return <PageSkeleton />
 
   const finished = deployments.filter((d) => d.status !== 'in_progress')

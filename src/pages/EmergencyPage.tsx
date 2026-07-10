@@ -30,10 +30,12 @@ export function EmergencyPage() {
   )
   const down = data.services.filter((s) => s.status === 'offline')
   const healthy = data.services.filter((s) => s.status === 'healthy')
+  const canPanic = down.length > 0
   const critical = down.length > 0
   const glow = critical ? '#ff4d4f' : '#fbbf24'
 
   const fire = () => {
+    if (!canPanic) return
     setArmed(false)
     panic.mutate()
   }
@@ -63,8 +65,8 @@ export function EmergencyPage() {
             Emergency Recovery
           </h1>
           <p className="mt-2 max-w-md text-[13.5px] text-fg-muted">
-            One tap restarts every offline service in parallel, flags related incidents as
-            auto-recovered, and fires external alerts to Telegram and Discord.
+            Restarts every offline service in parallel and flags related incidents as
+            auto-recovered. Notification delivery is simulated in this preview.
           </p>
 
           <div className="mt-7 min-h-[3rem]">
@@ -79,7 +81,7 @@ export function EmergencyPage() {
                   <Siren className="h-5 w-5 animate-pulse" />
                   Recovering the fleet…
                 </motion.div>
-              ) : armed ? (
+              ) : armed && canPanic ? (
                 <motion.div
                   key="armed"
                   initial={{ opacity: 0, scale: 0.96 }}
@@ -89,13 +91,13 @@ export function EmergencyPage() {
                 >
                   <Button variant="danger" size="md" onClick={fire}>
                     <OctagonAlert className="h-4 w-4" />
-                    Confirm — recover {down.length || 'all'} now
+                    Confirm — recover {down.length} now
                   </Button>
                   <Button variant="ghost" size="md" onClick={() => setArmed(false)}>
                     <X className="h-4 w-4" /> Cancel
                   </Button>
                 </motion.div>
-              ) : (
+              ) : canPanic ? (
                 <motion.button
                   key="idle"
                   initial={{ opacity: 0, scale: 0.96 }}
@@ -109,6 +111,8 @@ export function EmergencyPage() {
                   <Siren className="h-6 w-6" />
                   PANIC
                 </motion.button>
+              ) : (
+                <div className="text-[13px] text-fg-faint">No offline services to recover.</div>
               )}
             </AnimatePresence>
           </div>

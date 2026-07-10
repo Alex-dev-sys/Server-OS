@@ -6,7 +6,6 @@ import {
   HardDrive,
   KeyRound,
   MemoryStick,
-  Settings2,
   TerminalSquare,
   X,
   Zap,
@@ -23,6 +22,7 @@ import { Metric } from '@/components/ui/Metric'
 import { ProgressBar } from '@/components/ui/ProgressBar'
 import { ServiceActions } from './ServiceActions'
 import { LogStream } from '@/components/logs/LogStream'
+import { ServiceSettings } from '@/components/service/ServiceSettings'
 
 export function ServiceDrawer() {
   const id = useUI((s) => s.drawerServiceId)
@@ -129,7 +129,7 @@ function DrawerBody({ service, onClose }: { service: Service; onClose: () => voi
           <Tool icon={<TerminalSquare className="h-4 w-4" />} label="Console" />
           <Tool icon={<FileText className="h-4 w-4" />} label="Logs" />
           <Tool icon={<FolderOpen className="h-4 w-4" />} label="Files" />
-          <Tool icon={<Settings2 className="h-4 w-4" />} label="Config" />
+          <ServiceSettings service={service} mode="tool" />
           <Tool icon={<KeyRound className="h-4 w-4" />} label="SSH" />
         </div>
 

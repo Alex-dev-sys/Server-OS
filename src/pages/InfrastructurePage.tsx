@@ -15,10 +15,25 @@ const FILTERS: { key: Filter; label: string }[] = [
   { key: 'restarting', label: 'Restarting' },
   { key: 'offline', label: 'Offline' },
 ]
+const FILTER_KEY = 'infra-service-filter:v1'
+
+function initialFilter(): Filter {
+  try {
+    const saved = window.localStorage.getItem(FILTER_KEY)
+    return FILTERS.some((filter) => filter.key === saved) ? saved as Filter : 'all'
+  } catch {
+    return 'all'
+  }
+}
 
 export function InfrastructurePage() {
   const { data, isLoading } = useInfra()
-  const [filter, setFilter] = useState<Filter>('all')
+  const [filter, setFilter] = useState<Filter>(initialFilter)
+
+  const chooseFilter = (next: Filter) => {
+    setFilter(next)
+    window.localStorage.setItem(FILTER_KEY, next)
+  }
 
   if (isLoading || !data) return <PageSkeleton />
 
@@ -38,7 +53,7 @@ export function InfrastructurePage() {
             return (
               <button
                 key={f.key}
-                onClick={() => setFilter(f.key)}
+                onClick={() => chooseFilter(f.key)}
                 className={cn(
                   'rounded-lg px-3 py-1.5 text-[12px] font-medium transition-colors',
                   filter === f.key ? 'bg-surface-2 text-fg' : 'text-fg-faint hover:text-fg-muted',

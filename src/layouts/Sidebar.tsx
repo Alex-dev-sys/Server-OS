@@ -20,7 +20,7 @@ export function Sidebar() {
     <motion.aside
       animate={{ width: collapsed ? 76 : 248 }}
       transition={{ type: 'spring', stiffness: 380, damping: 34 }}
-      className="relative z-20 flex h-full shrink-0 flex-col border-r border-border bg-surface/60"
+      className="relative z-20 hidden h-full shrink-0 flex-col border-r border-border bg-surface/60 md:flex"
     >
       {/* Brand */}
       <div className="flex h-16 items-center gap-2.5 px-4">

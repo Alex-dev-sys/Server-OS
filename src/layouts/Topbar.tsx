@@ -27,11 +27,12 @@ export function Topbar() {
       {/* Search */}
       <button
         onClick={() => setCommandOpen(true)}
-        className="group flex h-9 w-72 items-center gap-2.5 rounded-xl border border-border bg-surface-2/70 px-3 text-left text-fg-faint transition-colors hover:border-fg-faint"
+        title="Search services, logs and commands"
+        className="group flex h-9 w-9 shrink-0 items-center justify-center gap-2.5 rounded-xl border border-border bg-surface-2/70 px-0 text-left text-fg-faint transition-colors hover:border-fg-faint sm:w-72 sm:justify-start sm:px-3"
       >
         <Search className="h-4 w-4" />
-        <span className="text-[13px]">Search services, logs, commands…</span>
-        <kbd className="ml-auto rounded-md border border-border bg-surface px-1.5 py-0.5 font-mono text-[10px]">
+        <span className="hidden text-[13px] sm:inline">Search services, logs, commands…</span>
+        <kbd className="ml-auto hidden rounded-md border border-border bg-surface px-1.5 py-0.5 font-mono text-[10px] sm:inline">
           ⌘K
         </kbd>
       </button>

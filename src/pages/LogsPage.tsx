@@ -116,7 +116,8 @@ export function LogsPage() {
   const toggleLevel = (lv: Level) =>
     setMuted((prev) => {
       const next = new Set(prev)
-      next.has(lv) ? next.delete(lv) : next.add(lv)
+      if (next.has(lv)) next.delete(lv)
+      else next.add(lv)
       return next
     })
 

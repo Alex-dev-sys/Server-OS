@@ -45,4 +45,8 @@ export const api = {
   markNotificationsRead(): Promise<void> {
     return withLatency(() => engine.markNotificationsRead())
   },
+
+  resetDemo(): Promise<void> {
+    return withLatency(() => engine.resetDemo())
+  },
 }

@@ -70,3 +70,7 @@ export function usePanic() {
 export function useMarkNotificationsRead() {
   return useMutation({ mutationFn: () => api.markNotificationsRead() })
 }
+
+export function useResetDemo() {
+  return useMutation({ mutationFn: () => api.resetDemo() })
+}

@@ -25,6 +25,10 @@ const ROUTE: Record<string, string> = {
   postgres: '/database',
   redis: '/database',
   docker: '/docker',
+  vpn: '/vpn',
+  storage: '/storage',
+  queue: '/queue',
+  ci: '/ci',
 }
 
 const TAGLINE: Partial<Record<ServiceKind, string>> = {
@@ -36,6 +40,10 @@ const TAGLINE: Partial<Record<ServiceKind, string>> = {
   nginx: 'Edge reverse proxy',
   backup: 'Backup & snapshots',
   monitoring: 'Observability stack',
+  vpn: 'WireGuard remote access gateway',
+  storage: 'S3-compatible object storage',
+  queue: 'Durable asynchronous job broker',
+  ci: 'Build, test and deployment executor',
 }
 
 export function ServicePage({ primaryId, extraIds = [] }: { primaryId: string; extraIds?: string[] }) {

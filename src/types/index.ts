@@ -20,6 +20,10 @@ export type ServiceKind =
   | 'docker'
   | 'backup'
   | 'monitoring'
+  | 'vpn'
+  | 'storage'
+  | 'queue'
+  | 'ci'
 
 export interface Metrics {
   cpu: number // %

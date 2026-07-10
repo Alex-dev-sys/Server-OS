@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ShieldAlert, ShieldCheck } from 'lucide-react'
 import { useInfra } from '@/hooks/useInfra'
@@ -15,10 +15,6 @@ export function IncidentsPage() {
 
   const incidents = data?.incidents ?? []
   const active = incidents.find((i) => i.id === selected) ?? incidents[0] ?? null
-
-  useEffect(() => {
-    if (!selected && incidents[0]) setSelected(incidents[0].id)
-  }, [incidents, selected])
 
   if (isLoading || !data) return <PageSkeleton />
 

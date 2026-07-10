@@ -215,6 +215,95 @@ export function serviceHighlights(s: Service): ServiceHighlights {
         },
       }
     }
+    case 'vpn': {
+      const peers = down ? 0 : n(1, 11, 19)
+      const handshakeAge = down ? '—' : `${n(2, 6, 42)}s ago`
+      return {
+        headline: 'WireGuard peers, transfer and gateway health',
+        stats: [
+          { label: 'Active peers', value: `${peers}/24` },
+          { label: 'Last handshake', value: handshakeAge, accent: down ? '#ff4d4f' : '#6ee7b7' },
+          { label: 'Ingress', value: `${down ? 0 : n(3, 24, 96)} Mbps` },
+          { label: 'Egress', value: `${down ? 0 : n(4, 80, 260)} Mbps` },
+          { label: 'Endpoint', value: down ? 'unreachable' : 'vpn.natux.world:51820', accent: down ? '#ff4d4f' : undefined },
+        ],
+        table: {
+          title: 'Recent peers',
+          cols: ['Peer', 'Address', 'Handshake', 'Transfer'],
+          rows: [
+            ['danil-mbp', '10.8.0.2', down ? '—' : `${n(5, 8, 35)}s ago`, `${n(6, 1, 12)}.4 GB`],
+            ['ops-laptop', '10.8.0.4', down ? '—' : `${n(7, 9, 48)}s ago`, `${n(8, 400, 980)} MB`],
+            ['backup-node', '10.8.0.9', down ? '—' : `${n(9, 12, 60)}s ago`, `${n(10, 2, 18)}.1 GB`],
+          ],
+        },
+      }
+    }
+    case 'storage': {
+      const used = down ? 0 : Math.round(58 + seeded(s.restartCount + 2) * 20)
+      return {
+        headline: 'S3 buckets, lifecycle and storage health',
+        stats: [
+          { label: 'Used capacity', value: `${used}%`, accent: used > 85 ? '#fbbf24' : undefined },
+          { label: 'Objects', value: `${(42 + n(1, 1, 58)).toLocaleString()}k` },
+          { label: 'Buckets', value: `${down ? 0 : n(2, 8, 18)}` },
+          { label: 'Write rate', value: `${down ? 0 : n(3, 8, 86)} MB/s` },
+          { label: 'Erasure health', value: down ? 'degraded' : 'healthy', accent: down ? '#ff4d4f' : '#6ee7b7' },
+        ],
+        table: {
+          title: 'Largest buckets',
+          cols: ['Bucket', 'Objects', 'Size', 'Lifecycle'],
+          rows: [
+            ['backups', `${n(4, 18, 42)}k`, `${n(5, 140, 480)} GB`, '30 days'],
+            ['minecraft-worlds', `${n(6, 8, 22)}k`, `${n(7, 42, 120)} GB`, 'versioned'],
+            ['build-artifacts', `${n(8, 12, 36)}k`, `${n(9, 18, 90)} GB`, '14 days'],
+          ],
+        },
+      }
+    }
+    case 'queue': {
+      const depth = down ? 0 : n(1, 14, 94)
+      return {
+        headline: 'Durable job streams and consumer throughput',
+        stats: [
+          { label: 'Pending jobs', value: `${depth}`, accent: depth > 70 ? '#fbbf24' : undefined },
+          { label: 'Consumers', value: `${down ? 0 : n(2, 4, 12)}` },
+          { label: 'Throughput', value: `${down ? 0 : n(3, 120, 980)}/s` },
+          { label: 'Ack latency', value: `${down ? '—' : n(4, 2, 18)}ms` },
+          { label: 'Dead letters', value: `${down ? 0 : n(5, 0, 8)}`, accent: n(5, 0, 8) > 5 ? '#fbbf24' : undefined },
+        ],
+        table: {
+          title: 'Active streams',
+          cols: ['Stream', 'Pending', 'Consumers', 'Age'],
+          rows: [
+            ['jobs', `${depth}`, `${n(6, 3, 8)}`, `${n(7, 1, 24)}s`],
+            ['notifications', `${n(8, 0, 14)}`, `${n(9, 1, 4)}`, `${n(10, 1, 12)}s`],
+            ['analytics', `${n(11, 2, 28)}`, `${n(12, 1, 5)}`, `${n(13, 4, 48)}s`],
+          ],
+        },
+      }
+    }
+    case 'ci': {
+      const running = down ? 0 : n(1, 1, 4)
+      return {
+        headline: 'Build execution, artifacts and deployment gates',
+        stats: [
+          { label: 'Running jobs', value: `${running}/4`, accent: running >= 4 ? '#fbbf24' : undefined },
+          { label: 'Queued jobs', value: `${down ? 0 : n(2, 0, 12)}` },
+          { label: 'Cache hit', value: `${down ? 0 : n(3, 72, 98)}%` },
+          { label: 'Avg build', value: `${down ? '—' : n(4, 42, 168)}s` },
+          { label: 'Artifacts', value: `${down ? 0 : n(5, 12, 86)} GB` },
+        ],
+        table: {
+          title: 'Recent jobs',
+          cols: ['Pipeline', 'Branch', 'Status', 'Duration'],
+          rows: [
+            ['deploy-api', 'main', 'passed', `${n(6, 40, 96)}s`],
+            ['build-web', 'feat/dashboard', 'running', `${n(7, 12, 44)}s`],
+            ['backup-verify', 'main', 'passed', `${n(8, 28, 80)}s`],
+          ],
+        },
+      }
+    }
     default:
       return {
         headline: 'Service overview',

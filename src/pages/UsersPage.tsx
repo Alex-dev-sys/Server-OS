@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import {
   CheckCircle2,
   KeyRound,
@@ -51,10 +51,7 @@ export function UsersPage() {
   const users = data?.users ?? []
   const audit = data?.auditLog ?? []
 
-  const filtered = useMemo(
-    () => (roleFilter === 'all' ? users : users.filter((u) => u.role === roleFilter)),
-    [users, roleFilter],
-  )
+  const filtered = roleFilter === 'all' ? users : users.filter((u) => u.role === roleFilter)
 
   if (isLoading || !data) return <PageSkeleton />
 

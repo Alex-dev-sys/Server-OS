@@ -3,6 +3,7 @@ import type { Service, ServiceAction } from '@/types'
 import { useServiceAction } from '@/hooks/useInfra'
 import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/utils'
+import { useToasts } from '@/stores/toasts'
 
 export function ServiceActions({
   service,
@@ -14,12 +15,19 @@ export function ServiceActions({
   className?: string
 }) {
   const action = useServiceAction()
+  const pushToast = useToasts((state) => state.push)
   const busy = service.status === 'restarting'
   const down = service.status === 'offline'
 
   const run = (a: ServiceAction) => (e: React.MouseEvent) => {
     e.stopPropagation()
-    action.mutate({ id: service.id, action: a })
+    action.mutate(
+      { id: service.id, action: a },
+      {
+        onSuccess: () => pushToast({ title: `${service.name}: ${a} requested`, message: 'The service state has been updated.', tone: 'success' }),
+        onError: () => pushToast({ title: `${service.name}: ${a} failed`, message: 'The requested action could not be completed.', tone: 'error' }),
+      },
+    )
   }
 
   return (

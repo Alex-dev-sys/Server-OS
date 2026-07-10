@@ -7,6 +7,9 @@ import {
   Globe,
   Grab,
   Network,
+  Shield,
+  ListTree,
+  GitBranch,
   Webhook,
   Zap,
   type LucideIcon,
@@ -24,6 +27,10 @@ export const kindIcon: Record<ServiceKind, LucideIcon> = {
   docker: Container,
   backup: Archive,
   monitoring: Activity,
+  vpn: Shield,
+  storage: Archive,
+  queue: ListTree,
+  ci: GitBranch,
 }
 
 export interface StatusMeta {

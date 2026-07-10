@@ -11,7 +11,7 @@ import {
  *  (the engine tick) so the chart tail advances in real time. */
 export function useMetricHistory(rangeMs: number): SeriesRow[] {
   useEffect(() => {
-    startMetricHistory()
+    return startMetricHistory()
   }, [])
 
   // Bump on every ingested sample.

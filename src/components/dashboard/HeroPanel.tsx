@@ -1,11 +1,25 @@
 import { motion } from 'framer-motion'
-import { Activity, CircleCheck, Clock, ServerCog, TriangleAlert } from 'lucide-react'
+import { Activity, CircleCheck, Clock, DatabaseZap, Loader2, Play, RotateCcw, ServerCog, TriangleAlert } from 'lucide-react'
 import type { InfraSummary } from '@/types'
 import { Card } from '@/components/ui/Card'
 import { HealthRing } from './HealthRing'
 import { cn } from '@/lib/utils'
 
-export function HeroPanel({ summary }: { summary: InfraSummary }) {
+export function HeroPanel({
+  summary,
+  onDemoIncident,
+  demoPending,
+  onResetDemo,
+  resetPending,
+  onGuidedDemo,
+}: {
+  summary: InfraSummary
+  onDemoIncident: () => void
+  demoPending: boolean
+  onResetDemo: () => void
+  resetPending: boolean
+  onGuidedDemo: () => void
+}) {
   const calm = summary.allHealthy
   const headline = calm
     ? 'Everything is running smoothly.'
@@ -45,6 +59,39 @@ export function HeroPanel({ summary }: { summary: InfraSummary }) {
               ? 'All monitored services are responding within nominal thresholds.'
               : 'Review the affected nodes below and recover them in one click.'}
           </p>
+
+          {calm && (
+            <div className="mt-4 flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={onDemoIncident}
+                disabled={demoPending}
+                className="inline-flex items-center gap-2 rounded-lg border border-warning/40 bg-warning/10 px-3 py-2 text-[12px] font-medium text-warning transition-colors hover:bg-warning/15 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {demoPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <DatabaseZap className="h-3.5 w-3.5" />}
+                {demoPending ? 'Starting demo incident…' : 'Simulate PostgreSQL outage'}
+              </button>
+              <button
+                type="button"
+                onClick={onGuidedDemo}
+                disabled={demoPending}
+                className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface-2 px-3 py-2 text-[12px] font-medium text-fg-muted transition-colors hover:text-fg disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <Play className="h-3.5 w-3.5" /> Run guided demo
+              </button>
+            </div>
+          )}
+          {!calm && (
+            <button
+              type="button"
+              onClick={onResetDemo}
+              disabled={resetPending}
+              className="mt-4 inline-flex items-center gap-2 rounded-lg border border-border bg-surface-2 px-3 py-2 text-[12px] font-medium text-fg-muted transition-colors hover:text-fg disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <RotateCcw className={resetPending ? 'h-3.5 w-3.5 animate-spin' : 'h-3.5 w-3.5'} />
+              {resetPending ? 'Resetting demo…' : 'Reset demo'}
+            </button>
+          )}
 
           <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
             <Stat icon={<Activity className="h-4 w-4" />} label="Uptime" value={`${summary.uptimePct.toFixed(2)}%`} />

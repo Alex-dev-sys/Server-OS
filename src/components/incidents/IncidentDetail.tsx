@@ -25,6 +25,7 @@ export function IncidentDetail({
   const resolve = useResolveIncident()
   const serviceDown = service?.status === 'offline'
   const restarting = service?.status === 'restarting'
+  const canResolve = service?.status === 'healthy'
   const busy = action.isPending || resolve.isPending || restarting
 
   // Downtime: frozen once resolved, ticks live while the incident is open.
@@ -160,9 +161,11 @@ export function IncidentDetail({
                 {restarting ? 'Recovering…' : serviceDown ? 'Restart & resolve' : 'Restart service'}
               </Button>
             )}
-            <Button variant="surface" disabled={busy} onClick={() => resolve.mutate(incident.id)}>
-              <ShieldCheck className="h-4 w-4" /> Mark resolved
-            </Button>
+            {canResolve && (
+              <Button variant="surface" disabled={busy} onClick={() => resolve.mutate(incident.id)}>
+                <ShieldCheck className="h-4 w-4" /> Mark resolved
+              </Button>
+            )}
           </div>
         )}
       </div>

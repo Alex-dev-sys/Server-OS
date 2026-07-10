@@ -70,7 +70,7 @@ export function SettingsPage() {
   return (
     <div className="space-y-6">
       {/* Appearance */}
-      <Section title="Appearance" subtitle="Accent colour and layout density">
+      <Section title="Appearance" subtitle="Accent colour and page spacing">
         <Card className="space-y-5 p-5">
           <Row label="Accent colour" hint="Drives buttons, highlights and charts">
             <div className="flex items-center gap-2">
@@ -99,7 +99,7 @@ export function SettingsPage() {
 
           <div className="h-px bg-border" />
 
-          <Row label="Density" hint="Spacing of tables and cards">
+          <Row label="Density" hint="Spacing around dashboard pages">
             <div className="flex gap-1.5">
               {(['comfortable', 'compact'] as const).map((d) => (
                 <button
@@ -123,9 +123,12 @@ export function SettingsPage() {
       {/* Integrations */}
       <Section
         title="Integrations"
-        subtitle={`${connected} of ${INTEGRATIONS.length} connected`}
-        action={<Badge color="#60a5fa">{connected} live</Badge>}
+        subtitle={`${connected} of ${INTEGRATIONS.length} configured locally`}
+        action={<Badge color="#fbbf24">preview only</Badge>}
       >
+        <p className="mb-3 text-[12px] text-fg-faint">
+          These switches are stored in this browser only. They do not connect external services or send alerts.
+        </p>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {INTEGRATIONS.map(({ id, label, hint, Icon }) => {
             const on = integrations[id]
@@ -142,7 +145,7 @@ export function SettingsPage() {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 text-[13px] font-semibold text-fg">
                     {label}
-                    {on && <Badge color="#6ee7b7">connected</Badge>}
+                    {on && <Badge color="#fbbf24">configured</Badge>}
                   </div>
                   <div className="truncate text-[11px] text-fg-faint">{hint}</div>
                 </div>
@@ -156,14 +159,17 @@ export function SettingsPage() {
       {/* Automation rules */}
       <Section
         title="Automation rules"
-        subtitle={`${activeRules} of ${rules.length} active`}
+        subtitle={`${activeRules} of ${rules.length} enabled locally`}
         action={
-          <Badge color="#8b5cf6">
+          <Badge color="#fbbf24">
             <Zap className="h-3 w-3" />
-            engine
+            preview only
           </Badge>
         }
       >
+        <p className="mb-3 text-[12px] text-fg-faint">
+          Rules are saved locally for now; no automation is executed until a backend worker is connected.
+        </p>
         <Card className="overflow-hidden">
           {/* Add form */}
           <div className="flex flex-col gap-2 border-b border-border p-4 sm:flex-row sm:items-center">

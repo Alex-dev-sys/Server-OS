@@ -26,7 +26,8 @@ export type MetricKey = keyof Omit<Sample, 't'>
 const CAP = 1200 // ~40min of real samples at the 2s engine cadence
 const buf: Sample[] = []
 const listeners = new Set<() => void>()
-let started = false
+let stopIngest: (() => void) | null = null
+let consumers = 0
 
 function avg(snap: InfraSnapshot, sel: (m: number) => number, pick: (m: InfraSnapshot['services'][number]['metrics']) => number): number {
   const live = snap.services.filter((s) => s.status !== 'offline')
@@ -48,11 +49,18 @@ function ingest(snap: InfraSnapshot) {
   listeners.forEach((l) => l())
 }
 
-/** Idempotent — first hook mount wires the buffer to the live feed. */
+/** Reference-counted: only collect while at least one monitoring view is mounted. */
 export function startMetricHistory() {
-  if (started) return
-  started = true
-  api.subscribe(ingest)
+  consumers++
+  if (!stopIngest) stopIngest = api.subscribe(ingest)
+
+  return () => {
+    consumers--
+    if (consumers === 0) {
+      stopIngest?.()
+      stopIngest = null
+    }
+  }
 }
 
 export function subscribeHistory(cb: () => void) {

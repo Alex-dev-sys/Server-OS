@@ -38,12 +38,16 @@ const SEEDS: Seed[] = [
   { id: 'docker', name: 'Docker', kind: 'docker', version: '27.3.1', hostname: 'core-01', ip: '10.0.0.3', container: '—', status: 'healthy', cpu: 9, ram: 22, ramMb: 512, disk: 41, dependsOn: [] },
   { id: 'postgres', name: 'PostgreSQL', kind: 'postgres', version: '17.2', hostname: 'db-01', ip: '10.0.0.4', container: 'pg-main', status: 'healthy', cpu: 17, ram: 44, ramMb: 2048, disk: 63, dependsOn: ['docker'] },
   { id: 'redis', name: 'Redis', kind: 'redis', version: '7.4.1', hostname: 'db-01', ip: '10.0.0.5', container: 'redis-cache', status: 'healthy', cpu: 6, ram: 18, ramMb: 384, disk: 4, dependsOn: ['docker'] },
-  { id: 'api', name: 'REST API', kind: 'api', version: '2.8.0', hostname: 'app-01', ip: '10.0.0.6', container: 'api-node', status: 'healthy', cpu: 23, ram: 38, ramMb: 768, disk: 12, dependsOn: ['nginx', 'postgres', 'redis'] },
+  { id: 'api', name: 'REST API', kind: 'api', version: '2.8.0', hostname: 'app-01', ip: '10.0.0.6', container: 'api-node', status: 'healthy', cpu: 23, ram: 38, ramMb: 768, disk: 12, dependsOn: ['nginx', 'postgres', 'redis', 'queue'] },
   { id: 'website', name: 'Website', kind: 'website', version: '4.1.2', hostname: 'app-01', ip: '10.0.0.7', container: 'web-next', status: 'healthy', cpu: 11, ram: 26, ramMb: 512, disk: 9, dependsOn: ['nginx', 'api'] },
   { id: 'minecraft', name: 'Minecraft', kind: 'minecraft', version: 'Paper 1.21.4', hostname: 'game-01', ip: '10.0.0.8', container: 'mc-paper', status: 'healthy', cpu: 48, ram: 71, ramMb: 6144, disk: 58, dependsOn: ['docker'] },
   { id: 'openclaw', name: 'OpenClaw', kind: 'openclaw', version: '0.9.3', hostname: 'game-01', ip: '10.0.0.9', container: 'openclaw', status: 'healthy', cpu: 14, ram: 29, ramMb: 640, disk: 7, dependsOn: ['api'] },
-  { id: 'backup', name: 'Backup Server', kind: 'backup', version: 'restic 0.17', hostname: 'stor-01', ip: '10.0.0.10', container: 'restic', status: 'healthy', cpu: 3, ram: 9, ramMb: 256, disk: 77, dependsOn: ['postgres'] },
+  { id: 'backup', name: 'Backup Server', kind: 'backup', version: 'restic 0.17', hostname: 'stor-01', ip: '10.0.0.10', container: 'restic', status: 'healthy', cpu: 3, ram: 9, ramMb: 256, disk: 77, dependsOn: ['postgres', 'storage'] },
   { id: 'monitoring', name: 'Monitoring', kind: 'monitoring', version: 'Prom 3.0', hostname: 'obs-01', ip: '10.0.0.11', container: 'prometheus', status: 'healthy', cpu: 12, ram: 31, ramMb: 896, disk: 34, dependsOn: [] },
+  { id: 'vpn', name: 'VPN Gateway', kind: 'vpn', version: 'WireGuard 1.0', hostname: 'edge-01', ip: '10.0.0.12', container: 'wg-gateway', status: 'healthy', cpu: 5, ram: 14, ramMb: 192, disk: 6, dependsOn: ['docker'] },
+  { id: 'storage', name: 'Object Storage', kind: 'storage', version: 'MinIO RELEASE.2025', hostname: 'stor-01', ip: '10.0.0.13', container: 'minio', status: 'healthy', cpu: 10, ram: 36, ramMb: 1024, disk: 68, dependsOn: ['docker'] },
+  { id: 'queue', name: 'Message Queue', kind: 'queue', version: 'NATS 2.10', hostname: 'app-01', ip: '10.0.0.14', container: 'nats', status: 'healthy', cpu: 8, ram: 19, ramMb: 384, disk: 11, dependsOn: ['docker'] },
+  { id: 'ci', name: 'CI/CD Runner', kind: 'ci', version: 'Runner 17.8', hostname: 'core-01', ip: '10.0.0.15', container: 'ci-runner', status: 'healthy', cpu: 18, ram: 42, ramMb: 1536, disk: 32, dependsOn: ['docker', 'storage'] },
 ]
 
 const USER = 'danil'
@@ -77,6 +81,10 @@ const DEPLOY_SEEDS: DeploySeed[] = [
   { serviceId: 'postgres', version: '17.2', previousVersion: '17.1', status: 'success', env: 'production', branch: 'main', message: 'PostgreSQL 17.2 minor upgrade', commit: 'pg172aa', agoSec: 96 * H, durationSec: 210 },
   { serviceId: 'nginx', version: '1.27.3', previousVersion: '1.27.2', status: 'success', env: 'production', branch: 'main', message: 'nginx 1.27.3 + tighten TLS ciphers', commit: 'ng1273f', agoSec: 120 * H, durationSec: 18 },
   { serviceId: 'monitoring', version: 'Prom 3.0', previousVersion: 'Prom 2.54', status: 'success', env: 'production', branch: 'main', message: 'Prometheus 3.0 major upgrade', commit: 'pr30aa2', agoSec: 140 * H, durationSec: 96 },
+  { serviceId: 'vpn', version: 'WireGuard 1.0', previousVersion: 'WireGuard 0.0.202401', status: 'success', env: 'production', branch: 'main', message: 'Rotate gateway image and refresh peer keys', commit: 'wg10a3f', agoSec: 132 * H, durationSec: 18 },
+  { serviceId: 'storage', version: 'MinIO RELEASE.2025', previousVersion: 'MinIO RELEASE.2024', status: 'success', env: 'production', branch: 'main', message: 'Upgrade object storage and validate bucket lifecycle rules', commit: 'mn25b8c', agoSec: 84 * H, durationSec: 64 },
+  { serviceId: 'queue', version: 'NATS 2.10', previousVersion: 'NATS 2.9', status: 'success', env: 'production', branch: 'main', message: 'Enable durable job streams for API workers', commit: 'nt210de', agoSec: 40 * H, durationSec: 31 },
+  { serviceId: 'ci', version: 'Runner 17.8', previousVersion: 'Runner 17.7', status: 'success', env: 'production', branch: 'main', message: 'Add build cache volume and artifact cleanup', commit: 'ci178fa', agoSec: 18 * H, durationSec: 44 },
   { serviceId: 'api', version: '2.7.3', previousVersion: '2.7.2', status: 'success', env: 'production', branch: 'main', message: 'Cache layer for /v1/status', commit: 'api273z', agoSec: 150 * H, durationSec: 74 },
   { serviceId: 'openclaw', version: '0.9.2', previousVersion: '0.9.1', status: 'success', env: 'production', branch: 'main', message: 'Fix job dedupe race', commit: 'oc92xy1', agoSec: 168 * H, durationSec: 47 },
 ]
@@ -151,6 +159,26 @@ function initialLogs(kind: Service['kind'], nowMs: number): LogLine[] {
       ['info', 'autovacuum: VACUUM public.events'],
       ['debug', 'connection authorized: user=api db=main'],
     ],
+    vpn: [
+      ['info', 'wireguard interface wg0: peer handshake complete'],
+      ['info', '12 peers active · 184 Mbps egress'],
+      ['debug', 'persistent keepalive sent to peer 10.8.0.14'],
+    ],
+    storage: [
+      ['info', 'bucket backups: lifecycle scan complete'],
+      ['info', 'S3 PUT world-snapshot.tar.zst 200'],
+      ['debug', 'erasure set health check ok'],
+    ],
+    queue: [
+      ['info', 'stream jobs: 18 pending messages'],
+      ['debug', 'consumer api-workers acknowledged batch 42'],
+      ['info', 'durable consumer backup-worker active'],
+    ],
+    ci: [
+      ['info', 'job deploy-api #482 completed successfully'],
+      ['debug', 'restored build cache layer'],
+      ['info', 'runner ready: 2 slots available'],
+    ],
     default: [
       ['info', 'service started'],
       ['info', 'health check ok'],
@@ -216,6 +244,23 @@ function routineLine(s: Service, seed: number): [LogLine['level'], string] {
     monitoring: [
       ['debug', `scraped ${n(8, 12)} targets`],
       ['info', `retention compaction ok`],
+    ],
+    vpn: [
+      ['info', `peer ${n(10, 29)} handshake refreshed`],
+      ['debug', `wg0 transfer ${n(40, 280)} Mbps egress`],
+      ['info', `${n(9, 18)} peers active`],
+    ],
+    storage: [
+      ['info', `bucket lifecycle sweep: ${n(2, 18)} objects expired`],
+      ['debug', `S3 health probe ${n(4, 28)}ms`],
+    ],
+    queue: [
+      ['info', `jobs stream depth ${n(4, 52)}`],
+      ['debug', `consumer api-workers ack latency ${n(1, 18)}ms`],
+    ],
+    ci: [
+      ['info', `job #${n(400, 520)} started on runner slot ${n(1, 4)}`],
+      ['debug', `artifact cache hit ${n(72, 98)}%`],
     ],
   }
   const pool = byKind[s.kind] ?? [['debug', 'heartbeat'] as [LogLine['level'], string]]
@@ -317,13 +362,31 @@ export class MockInfraEngine {
    *  is shown degraded (unless it is itself down). This is the visual "why". */
   private effectiveServices(): Service[] {
     const byId = new Map(this.services.map((s) => [s.id, s]))
-    return this.services.map((s) => {
-      if (s.status === 'offline' || s.status === 'restarting' || s.status === 'updating') return s
-      const brokenDep = s.dependsOn.some((d) => {
-        const dep = byId.get(d)
-        return dep && (dep.status === 'offline' || dep.status === 'restarting')
+    const effectiveStatus = new Map<string, ServiceStatus>()
+    const resolving = new Set<string>()
+
+    const resolveStatus = (service: Service): ServiceStatus => {
+      const cached = effectiveStatus.get(service.id)
+      if (cached) return cached
+      if (resolving.has(service.id)) return service.status
+      resolving.add(service.id)
+
+      const baseDown = service.status === 'offline' || service.status === 'restarting' || service.status === 'updating'
+      const degraded = !baseDown && service.dependsOn.some((id) => {
+        const dependency = byId.get(id)
+        if (!dependency) return false
+        const status = resolveStatus(dependency)
+        return status === 'offline' || status === 'restarting' || status === 'degraded'
       })
-      return brokenDep ? { ...s, status: 'degraded' as ServiceStatus } : s
+      const status = baseDown ? service.status : degraded ? 'degraded' : service.status
+      resolving.delete(service.id)
+      effectiveStatus.set(service.id, status)
+      return status
+    }
+
+    return this.services.map((s) => {
+      const status = resolveStatus(s)
+      return status === s.status ? s : { ...s, status }
     })
   }
 
@@ -479,6 +542,10 @@ export class MockInfraEngine {
       postgres: 'FATAL: could not write to WAL — disk pressure',
       redis: 'OOM command not allowed when maxmemory reached',
       nginx: 'worker process exited on signal 11 (SIGSEGV)',
+      vpn: 'wireguard interface wg0 stopped responding to handshakes',
+      storage: 'S3 backend unavailable: drive quorum lost',
+      queue: 'NATS stream jobs exceeded consumer acknowledgement deadline',
+      ci: 'runner executor stopped while provisioning build container',
       default: 'process exited unexpectedly (code 1)',
     }
     const rootCause = reason ?? causes[s.kind] ?? causes.default
@@ -530,7 +597,9 @@ export class MockInfraEngine {
 
   resolveIncident(id: string): void {
     const inc = this.incidents.find((i) => i.id === id)
-    if (inc && !inc.resolved) {
+    const service = inc && this.services.find((s) => s.id === inc.serviceId)
+    // An incident is only resolved after its own service is healthy again.
+    if (inc && service?.status === 'healthy' && !inc.resolved) {
       inc.resolved = true
       inc.resolvedAt = new Date().toISOString()
       inc.downtimeSec = (Date.now() - new Date(inc.startedAt).getTime()) / 1000
@@ -591,6 +660,8 @@ export class MockInfraEngine {
   // TODO(backend): fan out to systemctl/docker restart + real Telegram/Discord webhooks.
   async panic(): Promise<{ recovered: number }> {
     const offline = this.services.filter((s) => s.status === 'offline')
+    if (offline.length === 0) return { recovered: 0 }
+
     this.pushNotification({
       kind: 'critical',
       title: 'PANIC engaged',
@@ -625,6 +696,20 @@ export class MockInfraEngine {
     this.recomputeHealth()
     this.emit()
     return { recovered: offline.length }
+  }
+
+  /** Restore the deterministic demo baseline without reloading the page. */
+  resetDemo(): void {
+    const fresh = new MockInfraEngine()
+    this.services = fresh.services
+    this.incidents = fresh.incidents
+    this.deployments = fresh.deployments
+    this.notifications = fresh.notifications
+    this.users = fresh.users
+    this.auditLog = fresh.auditLog
+    this.tick = 0
+    this.startMs = fresh.startMs
+    this.emit()
   }
 
   private pushNotification(n: Omit<AppNotification, 'id' | 'ts' | 'read'>) {
